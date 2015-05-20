@@ -92,7 +92,7 @@ class Blueprint(_PackageBoundObject):
     def __init__(self, name, import_name, static_folder=None,
                  static_url_path=None, template_folder=None,
                  url_prefix=None, subdomain=None, url_defaults=None,
-                 root_path=None):
+                 root_path=None, host=None):
         _PackageBoundObject.__init__(self, import_name, template_folder,
                                      root_path=root_path)
         self.name = name
@@ -100,6 +100,7 @@ class Blueprint(_PackageBoundObject):
         self.subdomain = subdomain
         self.static_folder = static_folder
         self.static_url_path = static_url_path
+        self.host = host
         self.deferred_functions = []
         self.view_functions = {}
         if url_defaults is None:
@@ -168,6 +169,8 @@ class Blueprint(_PackageBoundObject):
         """Like :meth:`Flask.add_url_rule` but for a blueprint.  The endpoint for
         the :func:`url_for` function is prefixed with the name of the blueprint.
         """
+        if self.host is not None and 'host' not in options:
+            options['host'] = self.host
         if endpoint:
             assert '.' not in endpoint, "Blueprint endpoints should not contain dots"
         self.record(lambda s:

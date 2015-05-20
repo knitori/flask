@@ -323,7 +323,7 @@ class Flask(_PackageBoundObject):
     def __init__(self, import_name, static_path=None, static_url_path=None,
                  static_folder='static', template_folder='templates',
                  instance_path=None, instance_relative_config=False,
-                 root_path=None):
+                 root_path=None, host_matching=False):
         _PackageBoundObject.__init__(self, import_name,
                                      template_folder=template_folder,
                                      root_path=root_path)
@@ -508,7 +508,7 @@ class Flask(_PackageBoundObject):
         #:
         #:    app = Flask(__name__)
         #:    app.url_map.converters['list'] = ListConverter
-        self.url_map = Map()
+        self.url_map = Map(host_matching=host_matching)
 
         # tracks internally if the application already handled at least one
         # request.
@@ -992,6 +992,17 @@ class Flask(_PackageBoundObject):
             endpoint = _endpoint_from_view_func(view_func)
         options['endpoint'] = endpoint
         methods = options.pop('methods', None)
+
+        # `host` keyword is only relevant if `host_matching` is True.
+        # If `host_matching` is True and `host` is None, try to use
+        # ``SERVER_NAME`` instead.
+        host = None
+        if self.url_map.host_matching:
+            host = options.pop('host', None)
+            if host is None:
+                host = self.config.get('SERVER_NAME', None)
+        if host is not None:
+            options['host'] = host
 
         # if the methods are not given and the view_func object knows its
         # methods we can use that instead.  If neither exists, we go with
