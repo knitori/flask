@@ -54,6 +54,11 @@ class BlueprintSetupState(object):
         #: blueprint.
         self.url_prefix = url_prefix
 
+        host = self.options.get('host')
+        if host is None:
+            host = self.blueprint.host
+        self.host = host
+
         #: A dictionary with URL defaults that is added to each and every
         #: URL that was defined with the blueprint.
         self.url_defaults = dict(self.blueprint.url_values_defaults)
@@ -67,6 +72,7 @@ class BlueprintSetupState(object):
         if self.url_prefix:
             rule = self.url_prefix + rule
         options.setdefault('subdomain', self.subdomain)
+        options.setdefault('host', self.host)
         if endpoint is None:
             endpoint = _endpoint_from_view_func(view_func)
         defaults = self.url_defaults
