@@ -515,6 +515,17 @@ class Flask(_PackageBoundObject):
         self._got_first_request = False
         self._before_request_lock = Lock()
 
+        self.before_first_request(self._register_static_folder)
+
+        #: The click command line context for this application.  Commands
+        #: registered here show up in the :command:`flask` command once the
+        #: application has been discovered.  The default commands are
+        #: provided by Flask itself and can be overridden.
+        #:
+        #: This is an instance of a :class:`click.Group` object.
+        self.cli = cli.AppGroup(self)
+
+    def _register_static_folder(self):
         # register the static folder for the application.  Do that even
         # if the folder does not exist.  First of all it might be created
         # while the server is running (usually happens during development)
@@ -524,14 +535,6 @@ class Flask(_PackageBoundObject):
             self.add_url_rule(self.static_url_path + '/<path:filename>',
                               endpoint='static',
                               view_func=self.send_static_file)
-
-        #: The click command line context for this application.  Commands
-        #: registered here show up in the :command:`flask` command once the
-        #: application has been discovered.  The default commands are
-        #: provided by Flask itself and can be overridden.
-        #:
-        #: This is an instance of a :class:`click.Group` object.
-        self.cli = cli.AppGroup(self)
 
     def _get_error_handlers(self):
         from warnings import warn
